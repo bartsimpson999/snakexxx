@@ -8,14 +8,14 @@ function determineBotDirection(snake, food, enemySnake) {
         return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
     }
 
-    // Verifica se una posizione è sicura (non sul corpo di un serpente)
+    // Verifica se una posizione è sicura
     function isSafe(position) {
-        for (let part of snake.body) {
-            if (part[0] === position[0] && part[1] === position[1]) {
-                return false;
-            }
+        // Controllo dei bordi
+        if (position[0] < 0 || position[0] >= 500 || position[1] < 0 || position[1] >= 500) {
+            return false;
         }
-        for (let part of enemySnake.body) {
+        // Controllo collisioni con il proprio corpo e il corpo del nemico
+        for (let part of [...snake.body, ...enemySnake.body]) {
             if (part[0] === position[0] && part[1] === position[1]) {
                 return false;
             }
@@ -23,18 +23,6 @@ function determineBotDirection(snake, food, enemySnake) {
         return true;
     }
 
-    // Verifica se una posizione è sul corpo del nemico
-    function isOnEnemyBody(position) {
-        for (let part of enemySnake.body) {
-            if (part[0] === position[0] && part[1] === position[1]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Priorità: Mela > Coda del nemico > Testa del nemico
-    let targets = [food[0], enemyTail, enemyHead];
     let directions = ["east", "west", "south", "north"];
     let bestDirection = null;
     let minDistance = Infinity;
@@ -56,11 +44,11 @@ function determineBotDirection(snake, food, enemySnake) {
                 break;
         }
 
-        // Se la nuova posizione non è sicura o è sul corpo del nemico, continua con la prossima direzione
-        if (!isSafe(newHeadPosition) || isOnEnemyBody(newHeadPosition)) {
+        if (!isSafe(newHeadPosition)) {
             continue;
         }
 
+        let targets = [food[0], enemyTail, enemyHead];
         for (let target of targets) {
             let dist = distance(newHeadPosition, target);
             if (dist < minDistance) {
@@ -70,9 +58,8 @@ function determineBotDirection(snake, food, enemySnake) {
         }
     }
 
-    return bestDirection;
+    return bestDirection || directions[Math.floor(Math.random() * directions.length)];  // Fallback: scegli una direzione casuale se nessuna è sicura
 }
-
 
 function Game(boardSize) {
   this.boardSize = boardSize;
