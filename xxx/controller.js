@@ -106,10 +106,23 @@ Controller.prototype.clear = function () {
 }
 
 Controller.prototype.addHandler = function () {
-  var controller = this;
-  $('html').keydown(function (event) {
-    controller.turn(event.keyCode);
-  });
+    var controller = this;
+    $('html').keydown(function (event) {
+        switch (event.keyCode) {
+            case (37):
+                controller.game.snakes[0].turn("west");
+                break;
+            case (38):
+                controller.game.snakes[0].turn("north");
+                break;
+            case (39):
+                controller.game.snakes[0].turn("east");
+                break;
+            case (40):
+                controller.game.snakes[0].turn("south");
+                break;
+        }
+    });
 }
 
 Controller.prototype.drawScore = function () {
