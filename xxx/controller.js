@@ -127,7 +127,11 @@ Controller.prototype.addStartHandler = function () {
 }
 
 Controller.prototype.runStep = function () {
-  var controller = this;
+    var controller = this;
+    
+    // Usa il bot per decidere la direzione prima di chiamare game.step()
+    var move = this.bot.decideMove();
+    this.game.snakes[0].turn(move); // Assumendo che tu voglia controllare il primo serpente con il bot.
   controller.game.step();
   controller.render();
   if (!controller.game.lose()) {
