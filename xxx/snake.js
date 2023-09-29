@@ -23,6 +23,16 @@ function determineBotDirection(snake, food, enemySnake) {
         return true;
     }
 
+    // Verifica se una posizione è sul corpo del nemico
+    function isOnEnemyBody(position) {
+        for (let part of enemySnake.body) {
+            if (part[0] === position[0] && part[1] === position[1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Priorità: Mela > Coda del nemico > Testa del nemico
     let targets = [food[0], enemyTail, enemyHead];
     let directions = ["east", "west", "south", "north"];
@@ -46,8 +56,8 @@ function determineBotDirection(snake, food, enemySnake) {
                 break;
         }
 
-        // Se la nuova posizione non è sicura, continua con la prossima direzione
-        if (!isSafe(newHeadPosition)) {
+        // Se la nuova posizione non è sicura o è sul corpo del nemico, continua con la prossima direzione
+        if (!isSafe(newHeadPosition) || isOnEnemyBody(newHeadPosition)) {
             continue;
         }
 
@@ -62,6 +72,7 @@ function determineBotDirection(snake, food, enemySnake) {
 
     return bestDirection;
 }
+
 
 function Game(boardSize) {
   this.boardSize = boardSize;
