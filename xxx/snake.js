@@ -94,7 +94,7 @@ Game.prototype.collision = function () {
             }
         }
     }
-
+}
     // if (includes(tag, this.snakes[i].body[0])) this.snakes[i].length += 1;
 
     // if (includes(this.snakes[0].body[0], this.snakes[1].body[0])) {
