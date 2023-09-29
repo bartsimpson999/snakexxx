@@ -1,15 +1,68 @@
-function determineBotDirection(snake, food) {
+function determineBotDirection(snake, food, enemySnake) {
     let head = snake.body[0];
-    if (head[0] < food[0][0]) {
-        return "east";
-    } else if (head[0] > food[0][0]) {
-        return "west";
-    } else if (head[1] < food[0][1]) {
-        return "south";
-    } else if (head[1] > food[0][1]) {
-        return "north";
+    let enemyHead = enemySnake.body[0];
+    let enemyTail = enemySnake.body[enemySnake.body.length - 1];
+
+    // Calcola la distanza tra due punti
+    function distance(p1, p2) {
+        return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
     }
+
+    // Verifica se una posizione è sicura (non sul corpo di un serpente)
+    function isSafe(position) {
+        for (let part of snake.body) {
+            if (part[0] === position[0] && part[1] === position[1]) {
+                return false;
+            }
+        }
+        for (let part of enemySnake.body) {
+            if (part[0] === position[0] && part[1] === position[1]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Priorità: Mela > Coda del nemico > Testa del nemico
+    let targets = [food[0], enemyTail, enemyHead];
+    let directions = ["east", "west", "south", "north"];
+    let bestDirection = null;
+    let minDistance = Infinity;
+
+    for (let direction of directions) {
+        let newHeadPosition = [...head];
+        switch (direction) {
+            case "east":
+                newHeadPosition[0]++;
+                break;
+            case "west":
+                newHeadPosition[0]--;
+                break;
+            case "south":
+                newHeadPosition[1]++;
+                break;
+            case "north":
+                newHeadPosition[1]--;
+                break;
+        }
+
+        // Se la nuova posizione non è sicura, continua con la prossima direzione
+        if (!isSafe(newHeadPosition)) {
+            continue;
+        }
+
+        for (let target of targets) {
+            let dist = distance(newHeadPosition, target);
+            if (dist < minDistance) {
+                minDistance = dist;
+                bestDirection = direction;
+            }
+        }
+    }
+
+    return bestDirection;
 }
+
 function Game(boardSize) {
   this.boardSize = boardSize;
   this.snakes = this.makeSnakes(2);//new Snake(Math.floor(boardSize/2));
