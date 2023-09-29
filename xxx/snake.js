@@ -1,14 +1,32 @@
-function determineBotDirection(snake, food) {
+function determineBotDirection(snake, food, otherSnake) {
     let head = snake.body[0];
-    if (head[0] < food[0][0]) {
-        return "east";
-    } else if (head[0] > food[0][0]) {
-        return "west";
-    } else if (head[1] < food[0][1]) {
-        return "south";
-    } else if (head[1] > food[0][1]) {
-        return "north";
+    let possibleDirections = ["east", "west", "north", "south"];
+    let bestDirection = null;
+
+    for (let dir of possibleDirections) {
+        let newHead = [...head];
+        switch (dir) {
+            case "east":
+                newHead[0]++;
+                break;
+            case "west":
+                newHead[0]--;
+                break;
+            case "north":
+                newHead[1]--;
+                break;
+            case "south":
+                newHead[1]++;
+                break;
+        }
+
+        if (!includes(snake.body, newHead) && !includes(otherSnake.body, newHead)) {
+            bestDirection = dir;
+            break;
+        }
     }
+
+    return bestDirection || "east"; // Default to east if no safe direction is found
 }
 function Game(boardSize) {
   this.boardSize = boardSize;
