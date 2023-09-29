@@ -2,7 +2,26 @@ function Controller() {
   this.game = new Game(50);
   this.canvas = document.getElementById('canvas');
   this.context = canvas.getContext('2d');
-  this.bot = new Bot(this.game.snakes[0], this.game.snakes[1], this.game.food[0]); // Assumendo che food sia un array e tu stia usando il primo elemento come mela.
+  this.bot = null;
+}
+
+Controller.prototype.startGame = function() {
+    // ... altro codice ...
+
+    // Ora inizializza il bot
+    this.bot = new Bot(this.game.snakes[0], this.game.snakes[1], this.game.food[0]);
+}
+
+Controller.prototype.runStep = function () {
+    // ... altro codice ...
+
+    // Solo se il bot è definito, usa il bot per decidere la direzione
+    if (this.bot) {
+        var move = this.bot.decideMove();
+        this.game.snakes[0].turn(move); // o snakes[1] se il bot controlla il secondo serpente
+    }
+}
+
 }
 
 Controller.prototype.drawCircle = function (pos, color) {
