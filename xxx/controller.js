@@ -18,7 +18,7 @@ Controller.prototype.runStep = function () {
     // Solo se il bot è definito, usa il bot per decidere la direzione
     if (this.bot) {
         var move = this.bot.decideMove();
-        this.game.snakes[0].turn(move); // o snakes[1] se il bot controlla il secondo serpente
+        this.game.snakes[1].turn(move); // o snakes[1] se il bot controlla il secondo serpente
     }
 }
 
