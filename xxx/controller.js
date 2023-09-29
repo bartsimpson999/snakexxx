@@ -110,16 +110,16 @@ Controller.prototype.addHandler = function () {
     $('html').keydown(function (event) {
         switch (event.keyCode) {
             case (37):
-                controller.game.snakes[0].turn("west");
+                controller.game.snakes[1].turn("west");
                 break;
             case (38):
-                controller.game.snakes[0].turn("north");
+                controller.game.snakes[1].turn("north");
                 break;
             case (39):
-                controller.game.snakes[0].turn("east");
+                controller.game.snakes[1].turn("east");
                 break;
             case (40):
-                controller.game.snakes[0].turn("south");
+                controller.game.snakes[1].turn("south");
                 break;
         }
     });
