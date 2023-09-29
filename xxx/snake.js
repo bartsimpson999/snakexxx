@@ -63,7 +63,6 @@ function determineBotDirection(snake, food, enemySnake) {
     return bestDirection;
 }
 
-
 function Game(boardSize) {
   this.boardSize = boardSize;
   this.snakes = this.makeSnakes(2);//new Snake(Math.floor(boardSize/2));
