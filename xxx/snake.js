@@ -20,11 +20,23 @@ function determineBotDirection(snake, food, otherSnake) {
                 break;
         }
 
-        if (!includes(snake.body, newHead) && !includes(otherSnake.body, newHead)) {
-            bestDirection = dir;
-            break;
+        // Evita le direzioni che porterebbero a una collisione con se stesso
+        if (includes(snake.body, newHead)) {
+            continue;
         }
+
+        // Evita le direzioni che porterebbero a una collisione con il corpo del primo serpente, ad eccezione della testa e della coda
+        if (includes(otherSnake.body.slice(1, otherSnake.body.length - 1), newHead)) {
+            continue;
+        }
+
+        bestDirection = dir;
+        break;
     }
+
+    return bestDirection || "east"; // Default to east if no safe direction is found
+}
+
 
     return bestDirection || "east"; // Default to east if no safe direction is found
 }
@@ -48,26 +60,39 @@ Game.prototype.makeSnakes = function (number) {
 // var length = [1, 2];
 
 Game.prototype.collision = function () {
-  var bodies = [];
-  var tag1 = [];
-  var tag0 = [];
-  for (var i = 0; i < this.snakes.length; i++) {
-    bodies = bodies.concat(this.snakes[i].body.slice(1, this.snakes[i].length - 1));
-    tag1 = tag1.concat(this.snakes[1].body.slice(this.snakes[1].length - 1));
-    tag0 = tag0.concat(this.snakes[0].body.slice(this.snakes[0].length - 1));
-  }
-  // console.log("------------->", this.snakes.length);
-  var losers = [];
-  if (includes(tag1, this.snakes[0].body[0])) this.snakes[0].length += 1;
-  if (includes(tag0, this.snakes[1].body[0])) this.snakes[1].length += 1;
-  if (includes(tag0, this.snakes[0].body[0])) losers.push(i);
-  if (includes(tag1, this.snakes[1].body[0])) losers.push(i);
-  else {
+    var bodies = [];
+    var tag1 = [];
+    var tag0 = [];
     for (var i = 0; i < this.snakes.length; i++) {
-      if (includes(bodies, this.snakes[i].body[0])) {
-        console.log("dat collision by " + i);
-        losers.push(i + 1);
-      }
+        bodies = bodies.concat(this.snakes[i].body.slice(1, this.snakes[i].length - 1));
+        tag1 = tag1.concat(this.snakes[1].body.slice(this.snakes[1].length - 1));
+        tag0 = tag0.concat(this.snakes[0].body.slice(this.snakes[0].length - 1));
+    }
+
+    var losers = [];
+
+    // Se il bot colpisce la testa del primo serpente
+    if (includes(tag1, this.snakes[0].body[0])) {
+        this.snakes[0] = new Snake(this.randomCoord1());
+        this.snakes[1] = new Snake(this.randomCoord1());
+        this.snakes[0].eat();
+        this.snakes[1].eat();
+    } 
+    // Se il bot colpisce la coda del primo serpente
+    else if (includes(this.snakes[0].body.slice(1), this.snakes[1].body[0])) {
+        this.snakes[1].eat();
+    }
+
+    // Il tuo codice esistente per gestire altre collisioni
+    if (includes(tag0, this.snakes[0].body[0])) losers.push(i);
+    if (includes(tag1, this.snakes[1].body[0])) losers.push(i);
+    else {
+        for (var i = 0; i < this.snakes.length; i++) {
+            if (includes(bodies, this.snakes[i].body[0])) {
+                console.log("dat collision by " + i);
+                losers.push(i + 1);
+            }
+        }
     }
 
     // if (includes(tag, this.snakes[i].body[0])) this.snakes[i].length += 1;
