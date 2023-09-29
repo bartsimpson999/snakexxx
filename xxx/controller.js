@@ -163,7 +163,7 @@ Controller.prototype.runStep = function () {
     
     // Usa il bot per decidere la direzione prima di chiamare game.step()
     var move = this.bot.decideMove();
-    this.game.snakes[0].turn(move); // Assumendo che tu voglia controllare il primo serpente con il bot.
+    this.game.snakes[1].turn(move); // Assumendo che tu voglia controllare il primo serpente con il bot.
   controller.game.step();
   controller.render();
   if (!controller.game.lose()) {
