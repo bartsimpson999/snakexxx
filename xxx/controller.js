@@ -2,6 +2,7 @@ function Controller() {
   this.game = new Game(50);
   this.canvas = document.getElementById('canvas');
   this.context = canvas.getContext('2d');
+  this.bot = new Bot(this.game.snakes[0], this.game.snakes[1], this.game.food[0]); // Assumendo che food sia un array e tu stia usando il primo elemento come mela.
 }
 
 Controller.prototype.drawCircle = function (pos, color) {
