@@ -1,31 +1,3 @@
-function determineBotMove(game) {
-    const bot = game.snakes[1]; // Supponendo che il bot sia il secondo serpente
-    const player = game.snakes[0];
-    const apple = game.apple;
-
-    // Calcola la distanza tra il bot e la mela
-    const distanceToApple = calculateDistance(bot.body[0], apple);
-
-    // Se la mela è vicina, muoviti verso di essa
-    if (distanceToApple < 3) {
-        return moveTowards(bot.body[0], apple);
-    }
-
-    // Altrimenti, prova a seguire la coda del giocatore
-    const tail = player.body[player.body.length - 1];
-    return moveTowards(bot.body[0], tail);
-}
-
-function calculateDistance(pointA, pointB) {
-    return Math.abs(pointA[0] - pointB[0]) + Math.abs(pointA[1] - pointB[1]);
-}
-
-function moveTowards(start, end) {
-    if (start[0] < end[0]) return "east";
-    if (start[0] > end[0]) return "west";
-    if (start[1] < end[1]) return "south";
-    if (start[1] > end[1]) return "north";
-}
 function Controller() {
   this.game = new Game(50);
   this.canvas = document.getElementById('canvas');
