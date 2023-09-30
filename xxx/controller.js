@@ -127,8 +127,6 @@ Controller.prototype.addStartHandler = function () {
 
 Controller.prototype.runStep = function () {
   var controller = this;
-  let botDirection = determineBotDirection(controller.game.snakes[1], controller.game.food);
-controller.game.snakes[1].turn(botDirection);
   controller.game.step();
   controller.render();
   if (!controller.game.lose()) {
