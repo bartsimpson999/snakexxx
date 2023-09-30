@@ -6,6 +6,19 @@ function Game(boardSize) {
   k = 1;
 }
 0
+function determineBotDirection(snake, food) {
+    let head = snake.body[0];
+    if (head[0] < food[0][0]) {
+        return "east";
+    } else if (head[0] > food[0][0]) {
+        return "west";
+    } else if (head[1] < food[0][1]) {
+        return "south";
+    } else if (head[1] > food[0][1]) {
+        return "north";
+    }
+}
+
 Game.prototype.makeSnakes = function (number) {
   var snakes = [];
   var game = this;
