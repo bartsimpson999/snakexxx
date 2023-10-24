@@ -47,6 +47,11 @@ function evaluateMove(direction, game) {
     score += 100; // colpire la testa è molto vantaggioso
   }
 
+  // Se il bot sta seguendo la coda del giocatore e il giocatore sta per prendere il cibo, riduci il punteggio
+  if (distanceToTail == 1 && distanceToFood <= 1) {
+    score -= 200; // penalizza fortemente questa mossa
+  }
+
   return score;
 }
 
@@ -67,6 +72,7 @@ function isCollision(pos, snake) {
   }
   return false;
 }
+
 
 
 
