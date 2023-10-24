@@ -127,6 +127,17 @@ Controller.prototype.addStartHandler = function () {
 
 Controller.prototype.runStep = function () {
   var controller = this;
+  Controller.prototype.runStep = function () {
+  var controller = this;
+
+  // Chiamata del bot per determinare la mossa del serpente controllato dal bot
+  var botMove = determineBotMove(controller.game);
+  if (botMove) {
+    controller.game.snakes[1].turn(botMove); // Assumendo che snakes[1] sia il serpente controllato dal bot
+  }
+
+  controller.game.step();
+  controller.render();
   controller.game.step();
   controller.render();
   if (!controller.game.lose()) {
