@@ -24,7 +24,7 @@ function evaluateMove(direction, game) {
   var food = game.food[0];
 
   // Simula il movimento del bot in una certa direzione
-  var newPos = simulateMove(botSnake.body[0], direction, game.width, game.height);
+  var newPos = simulateMove(botSnake.body[0], direction);
 
   // Controlla se la nuova posizione causerà una collisione
   if (isCollision(newPos, mySnake) || isCollision(newPos, botSnake)) {
@@ -34,55 +34,29 @@ function evaluateMove(direction, game) {
   var score = 0;
 
   // Aumenta il punteggio se la mossa porta il bot più vicino al cibo
-  var distanceToFood = getDistance(newPos, food, game.width, game.height);
+  var distanceToFood = Math.abs(newPos[0] - food[0]) + Math.abs(newPos[1] - food[1]);
   score -= distanceToFood;
 
   // Aumenta il punteggio se la mossa porta il bot a prendere la coda del giocatore
-  var distanceToTail = getDistance(newPos, mySnake.body[mySnake.body.length - 1], game.width, game.height);
+  var distanceToTail = Math.abs(newPos[0] - mySnake.body[mySnake.body.length - 1][0]) + Math.abs(newPos[1] - mySnake.body[mySnake.body.length - 1][1]);
   score -= distanceToTail * 0.5; // la coda è meno prioritaria rispetto al cibo
 
   // Aumenta il punteggio se la mossa porta il bot a colpire la testa del giocatore
-  var distanceToHead = getDistance(newPos, mySnake.body[0], game.width, game.height);
+  var distanceToHead = Math.abs(newPos[0] - mySnake.body[0][0]) + Math.abs(newPos[1] - mySnake.body[0][1]);
   if (distanceToHead == 1) {
     score += 100; // colpire la testa è molto vantaggioso
-  }
-
-  // Se il bot sta seguendo la coda del giocatore e il giocatore sta per prendere il cibo, riduci il punteggio
-  if (distanceToTail == 1 && distanceToFood <= 1) {
-    score -= 200; // penalizza fortemente questa mossa
   }
 
   return score;
 }
 
-function simulateMove(pos, direction, width, height) {
+function simulateMove(pos, direction) {
   var newPos = pos.slice();
-  if (direction == "north") {
-    newPos[1]--;
-    if (newPos[1] < 0) newPos[1] = height - 1;
-  }
-  if (direction == "south") {
-    newPos[1]++;
-    if (newPos[1] >= height) newPos[1] = 0;
-  }
-  if (direction == "east") {
-    newPos[0]++;
-    if (newPos[0] >= width) newPos[0] = 0;
-  }
-  if (direction == "west") {
-    newPos[0]--;
-    if (newPos[0] < 0) newPos[0] = width - 1;
-  }
+  if (direction == "north") newPos[1]--;
+  if (direction == "south") newPos[1]++;
+  if (direction == "east") newPos[0]++;
+  if (direction == "west") newPos[0]--;
   return newPos;
-}
-
-function getDistance(pos1, pos2, width, height) {
-  var dx = Math.abs(pos1[0] - pos2[0]);
-  var dy = Math.abs(pos1[1] - pos2[1]);
-  // Considera la possibilità di attraversare il bordo
-  dx = Math.min(dx, width - dx);
-  dy = Math.min(dy, height - dy);
-  return dx + dy;
 }
 
 function isCollision(pos, snake) {
@@ -93,6 +67,7 @@ function isCollision(pos, snake) {
   }
   return false;
 }
+
 
 
 
