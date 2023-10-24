@@ -1,6 +1,3 @@
-// Variabile globale per tracciare se il giocatore ha fatto una mossa
-var playerHasMoved = false;
-
 function determineBotMove(game) {
   // Se il giocatore non ha ancora fatto una mossa, il bot non fa nulla
   if (!playerHasMoved) {
