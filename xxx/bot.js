@@ -1,17 +1,14 @@
 function determineBotMove(game) {
-  var mySnake = game.snakes[0]; // Tu sei snake 0
-  var botSnake = game.snakes[1]; // Il bot è snake 1
-  var food = game.food[0]; // Assumendo un solo cibo sul campo di gioco
-
-  var gameWidth = game.width; // Assumendo che il gioco abbia una proprietà width
-  var gameHeight = game.height; // Assumendo che il gioco abbia una proprietà height
+  var mySnake = game.snakes[0];
+  var botSnake = game.snakes[1];
+  var food = game.food[0];
 
   var directions = ["north", "south", "east", "west"];
   var bestDirection = null;
   var bestScore = -Infinity;
 
   directions.forEach(function(direction) {
-    var score = evaluateMove(direction, game, gameWidth, gameHeight);
+    var score = evaluateMove(direction, game);
     if (score > bestScore) {
       bestScore = score;
       bestDirection = direction;
@@ -21,13 +18,13 @@ function determineBotMove(game) {
   return bestDirection;
 }
 
-function evaluateMove(direction, game, gameWidth, gameHeight) {
+function evaluateMove(direction, game) {
   var mySnake = game.snakes[0];
   var botSnake = game.snakes[1];
   var food = game.food[0];
 
   // Simula il movimento del bot in una certa direzione
-  var newPos = simulateMove(botSnake.body[0], direction, gameWidth, gameHeight);
+  var newPos = simulateMove(botSnake.body[0], direction);
 
   // Controlla se la nuova posizione causerà una collisione
   if (isCollision(newPos, mySnake) || isCollision(newPos, botSnake)) {
@@ -53,24 +50,12 @@ function evaluateMove(direction, game, gameWidth, gameHeight) {
   return score;
 }
 
-function simulateMove(pos, direction, gameWidth, gameHeight) {
+function simulateMove(pos, direction) {
   var newPos = pos.slice();
-  if (direction == "north") {
-    newPos[1]--;
-    if (newPos[1] < 0) newPos[1] = gameHeight - 1; // Se supera il bordo superiore, riappare in basso
-  }
-  if (direction == "south") {
-    newPos[1]++;
-    if (newPos[1] >= gameHeight) newPos[1] = 0; // Se supera il bordo inferiore, riappare in alto
-  }
-  if (direction == "east") {
-    newPos[0]++;
-    if (newPos[0] >= gameWidth) newPos[0] = 0; // Se supera il bordo destro, riappare a sinistra
-  }
-  if (direction == "west") {
-    newPos[0]--;
-    if (newPos[0] < 0) newPos[0] = gameWidth - 1; // Se supera il bordo sinistro, riappare a destra
-  }
+  if (direction == "north") newPos[1]--;
+  if (direction == "south") newPos[1]++;
+  if (direction == "east") newPos[0]++;
+  if (direction == "west") newPos[0]--;
   return newPos;
 }
 
@@ -82,5 +67,4 @@ function isCollision(pos, snake) {
   }
   return false;
 }
-
 
