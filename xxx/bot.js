@@ -11,7 +11,6 @@ function determineBotMove(game) {
   for (const direction of directions) {
     const newHead = simulateMove(botSnake.body[0], direction);
     
-    // Verifica se la nuova posizione è valida
     if (isValidMove(newHead, boardSize, botSnake, playerSnake)) {
       const score = evaluateMove(newHead, food, playerSnake, botSnake, boardSize);
       if (score > bestScore) {
@@ -47,7 +46,7 @@ function evaluateMove(newHead, food, playerSnake, botSnake, boardSize) {
 
   // Distanza dal cibo
   const distanceToFood = manhattanDistance(newHead, food);
-  score += (boardSize * 2 - distanceToFood) * 2; // Priorità al cibo
+  score += (boardSize * 2 - distanceToFood) * 2;
 
   // Evita di colpire se stesso
   if (botSnake.body.some(segment => segment[0] === newHead[0] && segment[1] === newHead[1])) {
@@ -63,9 +62,9 @@ function evaluateMove(newHead, food, playerSnake, botSnake, boardSize) {
   const playerTail = playerSnake.body[playerSnake.body.length - 1];
   const distanceToPlayerTail = manhattanDistance(newHead, playerTail);
   if (distanceToPlayerTail === 0) {
-    score += 300; // Bonus per prendere la coda del giocatore
+    score += 300;
   } else {
-    score += (boardSize * 2 - distanceToPlayerTail); // Leggera attrazione verso la coda del giocatore
+    score += (boardSize * 2 - distanceToPlayerTail);
   }
 
   // Evita di rimanere intrappolato
@@ -92,6 +91,8 @@ function countFreeSpaces(pos, boardSize, botSnake, playerSnake) {
 
   return count;
 }
+
+window.determineBotMove = determineBotMove;
 
 
 
