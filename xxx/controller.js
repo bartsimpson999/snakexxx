@@ -28,17 +28,29 @@ Controller.prototype.findShortestPath = function(start, end) {
   var dx = end.x - start[0];
   var dy = end.y - start[1];
   
+  var possibleDirections = [];
+  
   if (Math.abs(dx) > Math.abs(dy)) {
-    return dx > 0 ? "east" : "west";
+    possibleDirections.push(dx > 0 ? "east" : "west");
+    possibleDirections.push(dy > 0 ? "south" : "north");
   } else {
-    return dy > 0 ? "south" : "north";
+    possibleDirections.push(dy > 0 ? "south" : "north");
+    possibleDirections.push(dx > 0 ? "east" : "west");
   }
+  
+  return possibleDirections;
 }
 
 Controller.prototype.turn = function () {
   var playerSnake = this.game.snakes[0];
-  var direction = this.findShortestPath(playerSnake.body[0], this.mousePosition);
-  playerSnake.turn(direction);
+  var possibleDirections = this.findShortestPath(playerSnake.body[0], this.mousePosition);
+  
+  // Prova le direzioni in ordine di preferenza
+  for (var i = 0; i < possibleDirections.length; i++) {
+    if (playerSnake.turn(possibleDirections[i])) {
+      break; // Direzione valida trovata
+    }
+  }
 
   // Bot logic remains unchanged
   var botMove = determineBotMove(this.game);
