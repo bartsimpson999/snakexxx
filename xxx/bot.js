@@ -1,98 +1,103 @@
 function determineBotMove(game) {
-  const botSnake = game.snakes[1];
-  const playerSnake = game.snakes[0];
-  const food = game.food[0];
-  const boardSize = game.boardSize;
+  var botSnake = game.snakes[1];
+  var playerSnake = game.snakes[0];
+  var food = game.food[0];
 
-  const directions = ["north", "south", "east", "west"];
-  let bestDirection = null;
-  let bestScore = -Infinity;
+  var directions = ["north", "south", "east", "west"];
+  var bestDirection = null;
+  var bestScore = -Infinity;
 
-  for (const direction of directions) {
-    const newHead = simulateMove(botSnake.body[0], direction);
-    
-    if (isValidMove(newHead, boardSize, botSnake, playerSnake)) {
-      const score = evaluateMove(newHead, food, playerSnake, botSnake, boardSize);
-      if (score > bestScore) {
-        bestScore = score;
-        bestDirection = direction;
-      }
+  directions.forEach(function(direction) {
+    var score = evaluateMove(direction, game);
+    if (score > bestScore) {
+      bestScore = score;
+      bestDirection = direction;
     }
+  });
+
+  return bestDirection;
+}
+
+function evaluateMove(direction, game) {
+  var botSnake = game.snakes[1];
+  var playerSnake = game.snakes[0];
+  var food = game.food[0];
+
+  var newPos = simulateMove(botSnake.body[0], direction);
+
+  // Evita collisioni
+  if (isCollision(newPos, botSnake) || isCollision(newPos, playerSnake) || isOutOfBounds(newPos, game.boardSize)) {
+    return -Infinity;
   }
 
-  return bestDirection || directions[Math.floor(Math.random() * directions.length)];
+  var score = 0;
+
+  // Priorità al cibo
+  var distanceToFood = manhattanDistance(newPos, food);
+  score -= distanceToFood * 2;
+
+  // Evita di intrappolarsi
+  if (willTrapItself(newPos, botSnake, game.boardSize)) {
+    score -= 100;
+  }
+
+  // Cerca di tagliare la strada al giocatore
+  var distanceToPlayerHead = manhattanDistance(newPos, playerSnake.body[0]);
+  if (distanceToPlayerHead < botSnake.body.length && botSnake.body.length > playerSnake.body.length) {
+    score += 50;
+  }
+
+  // Evita di avvicinarsi troppo alla testa del giocatore se è più lungo
+  if (distanceToPlayerHead === 1 && playerSnake.body.length >= botSnake.body.length) {
+    score -= 200;
+  }
+
+  return score;
 }
 
 function simulateMove(pos, direction) {
-  const [x, y] = pos;
-  switch (direction) {
-    case "north": return [x, y - 1];
-    case "south": return [x, y + 1];
-    case "east": return [x + 1, y];
-    case "west": return [x - 1, y];
-  }
+  var newPos = pos.slice();
+  if (direction === "north") newPos[1]--;
+  if (direction === "south") newPos[1]++;
+  if (direction === "east") newPos[0]++;
+  if (direction === "west") newPos[0]--;
+  return newPos;
 }
 
-function isValidMove(pos, boardSize, botSnake, playerSnake) {
-  const [x, y] = pos;
-  if (x < 0 || x >= boardSize || y < 0 || y >= boardSize) return false;
-  if (botSnake.body.some(segment => segment[0] === x && segment[1] === y)) return false;
-  if (playerSnake.body.some(segment => segment[0] === x && segment[1] === y)) return false;
-  return true;
+function isCollision(pos, snake) {
+  return snake.body.some(segment => pos[0] === segment[0] && pos[1] === segment[1]);
 }
 
-function evaluateMove(newHead, food, playerSnake, botSnake, boardSize) {
-  let score = 0;
-
-  // Distanza dal cibo
-  const distanceToFood = manhattanDistance(newHead, food);
-  score += (boardSize * 2 - distanceToFood) * 2;
-
-  // Evita di colpire se stesso
-  if (botSnake.body.some(segment => segment[0] === newHead[0] && segment[1] === newHead[1])) {
-    score -= 1000;
-  }
-
-  // Evita di colpire il giocatore (tranne la coda)
-  if (playerSnake.body.slice(0, -1).some(segment => segment[0] === newHead[0] && segment[1] === newHead[1])) {
-    score -= 500;
-  }
-
-  // Prova a prendere la coda del giocatore
-  const playerTail = playerSnake.body[playerSnake.body.length - 1];
-  const distanceToPlayerTail = manhattanDistance(newHead, playerTail);
-  if (distanceToPlayerTail === 0) {
-    score += 300;
-  } else {
-    score += (boardSize * 2 - distanceToPlayerTail);
-  }
-
-  // Evita di rimanere intrappolato
-  const freeSpaces = countFreeSpaces(newHead, boardSize, botSnake, playerSnake);
-  score += freeSpaces * 5;
-
-  return score;
+function isOutOfBounds(pos, boardSize) {
+  return pos[0] < 0 || pos[0] >= boardSize || pos[1] < 0 || pos[1] >= boardSize;
 }
 
 function manhattanDistance(pos1, pos2) {
   return Math.abs(pos1[0] - pos2[0]) + Math.abs(pos1[1] - pos2[1]);
 }
 
-function countFreeSpaces(pos, boardSize, botSnake, playerSnake) {
-  const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-  let count = 0;
+function willTrapItself(newPos, snake, boardSize) {
+  var virtualSnake = {
+    body: [newPos].concat(snake.body.slice(0, -1)),
+    length: snake.length
+  };
 
-  for (const [dx, dy] of directions) {
-    const newPos = [pos[0] + dx, pos[1] + dy];
-    if (isValidMove(newPos, boardSize, botSnake, playerSnake)) {
-      count++;
+  var floodFill = (pos) => {
+    if (isOutOfBounds(pos, boardSize) || isCollision(pos, virtualSnake)) {
+      return 0;
     }
-  }
+    virtualSnake.body.unshift(pos);
+    var count = 1;
+    count += floodFill([pos[0] + 1, pos[1]]);
+    count += floodFill([pos[0] - 1, pos[1]]);
+    count += floodFill([pos[0], pos[1] + 1]);
+    count += floodFill([pos[0], pos[1] - 1]);
+    return count;
+  };
 
-  return count;
+  var freeSpace = floodFill(newPos);
+  return freeSpace < snake.length;
 }
-
-window.determineBotMove = determineBotMove;
 
 
 
