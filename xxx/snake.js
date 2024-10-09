@@ -193,6 +193,13 @@ Snake.prototype.turn = function (cardinals) {
       break;
   }
 
+  // Verifica se la nuova direzione causerebbe una collisione immediata
+  var newHead = this.addVector(this.body[0], newDirection);
+  if (this.willCollideWithSelf(newHead)) {
+    // Se la nuova direzione causa una collisione, mantieni la direzione corrente
+    return false;
+  }
+
   if (compareCoord(this.addVector(newDirection, this.oldDirection), [0, 0])) {
     return false;
   } else if (compareCoord(newDirection, this.oldDirection)) {
@@ -201,6 +208,11 @@ Snake.prototype.turn = function (cardinals) {
     this.direction = newDirection;
     return true;
   }
+}
+
+Snake.prototype.willCollideWithSelf = function(newHead) {
+  // Verifica se la nuova posizione della testa colliderà con il corpo del serpente
+  return this.body.slice(1).some(segment => compareCoord(newHead, segment));
 }
 
 var compareCoord = function (coord1, coord2) {
