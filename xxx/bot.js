@@ -1,6 +1,5 @@
 function determineBotMove(game) {
   var botSnake = game.snakes[1];
-  var playerSnake = game.snakes[0];
   var food = game.food[0];
 
   var directions = ["north", "south", "east", "west"];
@@ -20,13 +19,12 @@ function determineBotMove(game) {
 
 function evaluateMove(direction, game) {
   var botSnake = game.snakes[1];
-  var playerSnake = game.snakes[0];
   var food = game.food[0];
 
   var newPos = simulateMove(botSnake.body[0], direction);
 
   // Evita collisioni
-  if (isCollision(newPos, botSnake) || isCollision(newPos, playerSnake) || isOutOfBounds(newPos, game.boardSize)) {
+  if (isCollision(newPos, botSnake) || isOutOfBounds(newPos, game.boardSize)) {
     return -Infinity;
   }
 
@@ -34,23 +32,15 @@ function evaluateMove(direction, game) {
 
   // Priorità al cibo
   var distanceToFood = manhattanDistance(newPos, food);
-  score -= distanceToFood * 2;
+  score -= distanceToFood;
 
   // Evita di intrappolarsi
-  if (willTrapItself(newPos, botSnake, game.boardSize)) {
-    score -= 100;
+  if (willTrapItself(newPos, botSnake, game)) {
+    score -= 1000;
   }
 
-  // Cerca di tagliare la strada al giocatore
-  var distanceToPlayerHead = manhattanDistance(newPos, playerSnake.body[0]);
-  if (distanceToPlayerHead < botSnake.body.length && botSnake.body.length > playerSnake.body.length) {
-    score += 50;
-  }
-
-  // Evita di avvicinarsi troppo alla testa del giocatore se è più lungo
-  if (distanceToPlayerHead === 1 && playerSnake.body.length >= botSnake.body.length) {
-    score -= 200;
-  }
+  // Premia i movimenti che portano verso spazi aperti
+  score += evaluateOpenSpace(newPos, game);
 
   return score;
 }
@@ -76,31 +66,40 @@ function manhattanDistance(pos1, pos2) {
   return Math.abs(pos1[0] - pos2[0]) + Math.abs(pos1[1] - pos2[1]);
 }
 
-function willTrapItself(newPos, snake, boardSize) {
+function willTrapItself(newPos, snake, game) {
   var virtualSnake = {
     body: [newPos].concat(snake.body.slice(0, -1)),
     length: snake.length
   };
 
-  var floodFill = (pos) => {
-    if (isOutOfBounds(pos, boardSize) || isCollision(pos, virtualSnake)) {
+  var floodFill = (pos, depth) => {
+    if (depth > 10) return 0; // Limita la profondità della ricorsione
+    if (isOutOfBounds(pos, game.boardSize) || isCollision(pos, virtualSnake)) {
       return 0;
     }
     virtualSnake.body.unshift(pos);
     var count = 1;
-    count += floodFill([pos[0] + 1, pos[1]]);
-    count += floodFill([pos[0] - 1, pos[1]]);
-    count += floodFill([pos[0], pos[1] + 1]);
-    count += floodFill([pos[0], pos[1] - 1]);
+    count += floodFill([pos[0] + 1, pos[1]], depth + 1);
+    count += floodFill([pos[0] - 1, pos[1]], depth + 1);
+    count += floodFill([pos[0], pos[1] + 1], depth + 1);
+    count += floodFill([pos[0], pos[1] - 1], depth + 1);
     return count;
   };
 
-  var freeSpace = floodFill(newPos);
-  return freeSpace < snake.length;
+  var freeSpace = floodFill(newPos, 0);
+  return freeSpace < snake.length * 2; // Aumentato il fattore di spazio libero
 }
 
+function evaluateOpenSpace(pos, game) {
+  var directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  var openSpaces = 0;
 
+  directions.forEach(function(dir) {
+    var newPos = [pos[0] + dir[0], pos[1] + dir[1]];
+    if (!isOutOfBounds(newPos, game.boardSize) && !isCollision(newPos, game.snakes[1])) {
+      openSpaces++;
+    }
+  });
 
-
-
-
+  return openSpaces * 10; // Premia di più gli spazi aperti
+}
