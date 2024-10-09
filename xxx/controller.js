@@ -2,7 +2,6 @@ function Controller() {
   this.game = new Game(50);
   this.canvas = document.getElementById('canvas');
   this.context = canvas.getContext('2d');
-  this.lastDirection = null; // Aggiungiamo questa variabile per tracciare l'ultima direzione
 }
 
 Controller.prototype.drawCircle = function (pos, color) {
@@ -14,39 +13,32 @@ Controller.prototype.drawCircle = function (pos, color) {
 
 Controller.prototype.turn = function (keyCode) {
   console.log(keyCode);
-  let newDirection;
 
   switch (keyCode) {
-    case 37: newDirection = "west"; break;
-    case 38: newDirection = "north"; break;
-    case 39: newDirection = "east"; break;
-    case 40: newDirection = "south"; break;
-    case 65: newDirection = "west"; break;
-    case 87: newDirection = "north"; break;
-    case 68: newDirection = "east"; break;
-    case 83: newDirection = "south"; break;
-    default: return; // Ignora altri tasti
-  }
-
-  // Previeni movimenti in diagonale
-  if (this.lastDirection) {
-    const oppositeDirections = {
-      "north": "south",
-      "south": "north",
-      "east": "west",
-      "west": "east"
-    };
-    if (newDirection !== this.lastDirection && newDirection !== oppositeDirections[this.lastDirection]) {
-      return; // Ignora il movimento diagonale
-    }
-  }
-
-  // Applica la nuova direzione al serpente appropriato
-  if ([37, 38, 39, 40].includes(keyCode)) {
-    this.game.snakes[0].turn(newDirection);
-    this.lastDirection = newDirection;
-  } else if ([65, 87, 68, 83].includes(keyCode)) {
-    this.game.snakes[1].turn(newDirection);
+    case (37):
+      this.game.snakes[0].turn("west");
+      break;
+    case (38):
+      this.game.snakes[0].turn("north");
+      break;
+    case (39):
+      this.game.snakes[0].turn("east");
+      break;
+    case (40):
+      this.game.snakes[0].turn("south");
+      break;
+    case (65):
+      this.game.snakes[1].turn("west");
+      break;
+    case (87):
+      this.game.snakes[1].turn("north");
+      break;
+    case (68):
+      this.game.snakes[1].turn("east");
+      break;
+    case (83):
+      this.game.snakes[1].turn("south");
+      break;
   }
 }
 
@@ -132,15 +124,17 @@ Controller.prototype.runStep = function () {
     } else {
       lostText = "Tie game!"
     }
-    if (lostText == "Tie game!") {
+    if (lostText == "Tie game!")
       controller.runLoop();
-    } else {
-      controller.drawPrompt(lostText + " Click to Restart.", "red");
+    else controller.drawPrompt(lostText + " Click to Restart.", "red");
+    if (lostText == "Player " + losers + " loses!") {
       $('#canvas').on('click', () => {
         window.location.reload()
       });
     }
+    controller.game.randomCoord();
     controller.reset();
+    console.log("-------------->")
     controller.addStartHandler();
   }
 }
@@ -151,20 +145,14 @@ Controller.prototype.reset = function () {
 
 Controller.prototype.runLoop = function () {
   var controller = this;
+
   window.setTimeout(function () {
     controller.runStep();
   }, controller.stepTime());
 }
 
 Controller.prototype.stepTime = function () {
-  const baseSpeed = 200; // Velocità di base più lenta
-  const minSpeed = 50; // Velocità minima
-  const speedReduction = 1; // Riduzione di velocità per ogni punto
-  
-  const totalLength = this.game.snakes[0].length + this.game.snakes[1].length;
-  const speed = Math.max(baseSpeed - totalLength * speedReduction, minSpeed);
-  
-  return speed;
+  return 125 - this.game.snakes[0].length - this.game.snakes[1].length;
 }
 
 $(function () {
@@ -173,4 +161,6 @@ $(function () {
   controller.addHandler();
   controller.addStartHandler();
   controller.drawPrompt("Start Game", "#818267");
+
+  console.log("You pressed keycode: " + event.keyCode);
 });
