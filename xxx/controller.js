@@ -2,6 +2,8 @@ function Controller() {
   this.game = new Game(50);
   this.canvas = document.getElementById('canvas');
   this.context = canvas.getContext('2d');
+  this.mousePosition = { x: 250, y: 250 }; // Posizione iniziale al centro
+  this.addMouseMoveHandler();
 }
 
 Controller.prototype.drawCircle = function (pos, color) {
@@ -11,34 +13,37 @@ Controller.prototype.drawCircle = function (pos, color) {
   this.context.fill();
 }
 
-Controller.prototype.turn = function (keyCode) {
-  console.log(keyCode);
+Controller.prototype.addMouseMoveHandler = function() {
+  var controller = this;
+  this.canvas.addEventListener('mousemove', function(event) {
+    var rect = controller.canvas.getBoundingClientRect();
+    controller.mousePosition = {
+      x: Math.floor((event.clientX - rect.left) / 10),
+      y: Math.floor((event.clientY - rect.top) / 10)
+    };
+  });
+}
 
-  switch (keyCode) {
-    case (37):
-      this.game.snakes[0].turn("west");
-      break;
-    case (38):
-      this.game.snakes[0].turn("north");
-      break;
-    case (39):
-      this.game.snakes[0].turn("east");
-      break;
-    case (40):
-      this.game.snakes[0].turn("south");
-      break;
-    case (65):
-      this.game.snakes[1].turn("west");
-      break;
-    case (87):
-      this.game.snakes[1].turn("north");
-      break;
-    case (68):
-      this.game.snakes[1].turn("east");
-      break;
-    case (83):
-      this.game.snakes[1].turn("south");
-      break;
+Controller.prototype.findShortestPath = function(start, end) {
+  var dx = end.x - start[0];
+  var dy = end.y - start[1];
+  
+  if (Math.abs(dx) > Math.abs(dy)) {
+    return dx > 0 ? "east" : "west";
+  } else {
+    return dy > 0 ? "south" : "north";
+  }
+}
+
+Controller.prototype.turn = function () {
+  var playerSnake = this.game.snakes[0];
+  var direction = this.findShortestPath(playerSnake.body[0], this.mousePosition);
+  playerSnake.turn(direction);
+
+  // Bot logic remains unchanged
+  var botMove = determineBotMove(this.game);
+  if (botMove) {
+    this.game.snakes[1].turn(botMove);
   }
 }
 
@@ -48,23 +53,21 @@ Controller.prototype.render = function () {
 
   controller.drawCircle(this.game.snakes[0].body[0], 'blue');
   _.each(this.game.snakes[0].body.slice(1), function (el) {
-    controller.drawCircle(el, 'red');
-  });
-  _.each(this.game.snakes[0].body.slice(-1), function (el) {
-    controller.drawCircle(el, 'yellow');
+    controller.drawCircle(el, 'lightblue');
   });
 
   controller.drawCircle(this.game.snakes[1].body[0], 'red');
   _.each(this.game.snakes[1].body.slice(1), function (el) {
-    controller.drawCircle(el, 'blue');
-  });
-  _.each(this.game.snakes[1].body.slice(-1), function (el) {
-    controller.drawCircle(el, 'yellow');
+    controller.drawCircle(el, 'pink');
   });
 
   _.each(this.game.food, function (el) {
     controller.drawCircle(el, 'yellow');
   });
+
+  // Draw cursor position
+  controller.drawCircle([this.mousePosition.x, this.mousePosition.y], 'green');
+
   controller.drawScore();
 }
 
@@ -73,10 +76,7 @@ Controller.prototype.clear = function () {
 }
 
 Controller.prototype.addHandler = function () {
-  var controller = this;
-  $('html').keydown(function (event) {
-    controller.turn(event.keyCode);
-  });
+  // We don't need keyboard handlers anymore
 }
 
 Controller.prototype.drawScore = function () {
@@ -91,7 +91,7 @@ Controller.prototype.drawScore = function () {
 
 Controller.prototype.drawPrompt = function (text, color) {
   var context = this.context;
-  context.font = "bold 20px zapfino";
+  context.font = "bold 20px Arial";
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.fillStyle = color;
@@ -108,10 +108,7 @@ Controller.prototype.addStartHandler = function () {
 
 Controller.prototype.runStep = function () {
   var controller = this;
-  var botMove = determineBotMove(controller.game);
-  if (botMove) {
-    controller.game.snakes[1].turn(botMove);
-  }
+  controller.turn();
   controller.game.step();
   controller.render();
   if (!controller.game.lose()) {
@@ -158,9 +155,6 @@ Controller.prototype.stepTime = function () {
 $(function () {
   var controller = new Controller()
   console.log(controller.game.snakes);
-  controller.addHandler();
   controller.addStartHandler();
-  controller.drawPrompt("Start Game", "#818267");
-
-  console.log("You pressed keycode: " + event.keyCode);
+  controller.drawPrompt("Click to Start", "#818267");
 });
